@@ -16,11 +16,19 @@ public class LinkLink extends JFrame implements ActionListener {
 	JPanel nPanel, cPanel, sPanel;//上中下三个panel
 	JButton gameButton[][] = new JButton[6][5];//游戏按钮组
 	JButton newButton, resetButton, exitButton;//新游戏|重排|退出游戏
+	JLabel scoreTipLabel = new JLabel("当前分数：");
 	JLabel scoreLabel = new JLabel("0");//分数标签
+	JLabel ruleTipLabel = new JLabel("游戏规则：" +
+			"行内消除加分100；" +
+			"一次拐角消除加分100；" +
+			"两次拐角消除加分100；" +
+			"重新排列扣分1000" +
+			"");
 	JButton firstClick, secondClick;//记录先后点击的两个游戏按钮
 	int data[][] = new int[8][7];//游戏按钮数据
 	static Boolean isSelect = false;//是否选中了游戏按钮
 	int x1 = 0, y1 = 0, x2 = 0, y2 = 0, firstValue = 0, secondValue = 0;//先后点击的两个按钮的坐标和值
+	
 	
 	/**
 	 * 游戏启动入口
@@ -31,7 +39,7 @@ public class LinkLink extends JFrame implements ActionListener {
 		LinkLink llk = new LinkLink();
 		llk.randomData();//初始化数据
 		llk.buildFrame();//初始化面板
-		llk.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		llk.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 	}
 	
 	/**
@@ -77,7 +85,7 @@ public class LinkLink extends JFrame implements ActionListener {
 		//实例化三个控制按钮并添加事件监听器
 		newButton = new JButton("重新开始");
 		newButton.addActionListener(this);
-		resetButton = new JButton("重新排列");
+		resetButton = new JButton("重新排列(-1000分)");
 		resetButton.addActionListener(this);
 		exitButton = new JButton("退出游戏");
 		exitButton.addActionListener(this);
@@ -87,10 +95,12 @@ public class LinkLink extends JFrame implements ActionListener {
 		sPanel.add(exitButton);
 		//修改分数标签内容并添加到nPanel头部面板
 		scoreLabel.setText(String.valueOf(Integer.parseInt(scoreLabel.getText())));
+		nPanel.add(scoreTipLabel);
 		nPanel.add(scoreLabel);
+		nPanel.add(ruleTipLabel);
 		//修改主框架参数
 		mainFrame.setLocationRelativeTo(null);//居中
-		mainFrame.setSize(500, 450);//大小
+		mainFrame.setSize(900, 800);//大小
 		mainFrame.setVisible(true);//显示
 	}
 	
@@ -99,7 +109,7 @@ public class LinkLink extends JFrame implements ActionListener {
 	 */
 	public void reset() {
 		int oldData[] = new int[30];//用来存储原先游戏数据
-//		int newData[][] = new int[8][7];//全部置空
+		int newData[][] = new int[8][7];//全部置空
 		int n = 0, c, r;
 		for (int i = 1; i <= 6; i++) {
 			for (int j = 1; j <= 5; j++) {
@@ -110,11 +120,11 @@ public class LinkLink extends JFrame implements ActionListener {
 			}
 		}
 		n -= 1;
-//		data = newData;//重置实例变量data
+		data = newData;//重置实例变量data
 		while (n >= 0) {
 			c = (int) (Math.random() * 6 + 1);
 			r = (int) (Math.random() * 5 + 1);
-			while (data[c][r] == 0) {
+			while (data[c][r] != 0) {
 				c = (int) (Math.random() * 6 + 1);
 				r = (int) (Math.random() * 5 + 1);
 			}
@@ -131,6 +141,7 @@ public class LinkLink extends JFrame implements ActionListener {
 				}
 			}
 		}
+		cutScore(1000);
 	}
 	
 	/**
@@ -144,12 +155,13 @@ public class LinkLink extends JFrame implements ActionListener {
 			randomData();//随机新数据
 			mainFrame.setVisible(false);//隐藏窗体
 			isSelect = false;//清除点击
+			scoreLabel.setText("0");
 			buildFrame();//重新建立窗体
 		}
 		if (e.getSource() == resetButton) {
 			reset();
 		}
-		if (e.getSource()==exitButton){
+		if (e.getSource() == exitButton) {
 			System.exit(0);
 		}
 		for (int i = 0; i < 6; i++) {
@@ -199,14 +211,17 @@ public class LinkLink extends JFrame implements ActionListener {
 	 */
 	public void judgeEliminate() {
 		if (canLineEliminate(x1, y1, x2, y2)) {//能行消
+			addScore(100);
 			hideButton();
 		} else {//不能行消
 			if (canOneAngleEliminate(x1, y1, x2, y2)) {//能一个拐角消除
+				addScore(200);
 				hideButton();
 			} else {//不能一个拐角消除
 				for (int i = 0; i < 8; i++) {
 					for (int j = 0; j < 7; j++) {
-						if (data[i][j]==0 && ((canLineEliminate(i, j, x1, y1) && canOneAngleEliminate(i, j, x2, y2)) || (canLineEliminate(i, j, x2, y2) && canOneAngleEliminate(i, j, x1, y1)))) {
+						if (data[i][j] == 0 && ((canLineEliminate(i, j, x1, y1) && canOneAngleEliminate(i, j, x2, y2)) || (canLineEliminate(i, j, x2, y2) && canOneAngleEliminate(i, j, x1, y1)))) {
+							addScore(300);
 							hideButton();
 						}
 					}
@@ -297,5 +312,13 @@ public class LinkLink extends JFrame implements ActionListener {
 		//清除消除格子的数据
 		data[x1][y1] = 0;
 		data[x2][y2] = 0;
+	}
+	
+	public void addScore(int num) {
+		scoreLabel.setText(String.valueOf(Integer.parseInt(scoreLabel.getText()) + num));
+	}
+	
+	public void cutScore(int num) {
+		scoreLabel.setText(String.valueOf(Integer.parseInt(scoreLabel.getText()) - num));
 	}
 }
