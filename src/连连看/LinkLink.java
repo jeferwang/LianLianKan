@@ -1,14 +1,10 @@
 package 连连看;
 
-import com.sun.xml.internal.bind.v2.TODO;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 public class LinkLink extends JFrame implements ActionListener {
 	JFrame mainFrame;//游戏主框架
